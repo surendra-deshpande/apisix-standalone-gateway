@@ -1,0 +1,48 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: apisix-standalone-gateway-route.yaml
+  namespace: {{ .Values.namespace }}
+  annotations:
+    config.kubernetes.io/change-cause: "Trigger an update"
+data:
+  apisix-standalone.yaml: |
+    ssls:
+        -
+          cert: |
+             {{ .Values.ssls.cert | nindent 13 | trim }}
+          key: |
+             {{ .Values.ssls.key | nindent 13 | trim }}
+          snis:
+        {{- range .Values.snis }}
+            - {{ . }}
+        {{- end }}
+        
+    global_rules:
+      -
+        id: 1
+        plugins:
+          datadome-protect:
+            datadome_server_side_key: "your-datadome-key"
+            # put the right key, else it will not work.
+    routes:
+      -
+        uri: /*
+        upstream:
+          nodes:
+            "httpbin.org:80": 1
+          type: roundrobin
+          scheme: http
+          pass_host: node
+          timeout:
+            connect: 20
+            send: 20
+            read: 20
+        plugins:
+          proxy-rewrite:
+            regex_uri:
+            - "^/(.*)"
+            - "/get"
+            use_real_request_uri_unsafe: false
+
+     #END

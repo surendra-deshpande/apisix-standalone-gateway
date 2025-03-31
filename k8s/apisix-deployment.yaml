@@ -1,0 +1,61 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: apisix-standalone-gateway
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: apisix-standalone-gateway
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: apisix-standalone-gateway
+  template:
+    metadata:
+      annotations:
+          checksum/config: {{ include (print $.Template.BasePath "/apisix-route-config.yaml") . | sha256sum }}
+      labels:
+        app: apisix-standalone-gateway
+    spec:
+      initContainers:
+        - name: apisix-standalone-gateway-init
+          image: {{ .Values.deployment.initimage }}
+          command: ["/bin/sh", "-c", "cp /temp/config.yaml /usr/local/apisix/conf/ && chmod 777 /usr/local/apisix/conf/config.yaml"]
+          volumeMounts:
+          - name: apisix-config
+            mountPath: /temp/config.yaml
+            subPath: apisix-config.yaml
+          - name: apisix-config-volume
+            mountPath: /usr/local/apisix/conf/
+      containers:
+        - name: apisix-standalone-gateway
+          env:
+            - name: APISIX_STAND_ALONE
+              value: "true"
+          image: {{ .Values.deployment.image }}
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 9080
+              protocol: TCP
+            - name: tls
+              containerPort: 9443
+              protocol: TCP
+          volumeMounts:
+            - name: config-volume
+              mountPath: /usr/local/apisix/conf/apisix.yaml
+              subPath: apisix-standalone.yaml
+            - name: apisix-config-volume
+              mountPath: /usr/local/apisix/conf/config.yaml
+              subPath: config.yaml
+          resources: {}
+      restartPolicy: Always
+      volumes:
+        - name: config-volume
+          configMap:
+            name: apisix-standalone-gateway-route.yaml
+        - name: apisix-config
+          configMap:
+            name: apisix-standalone-gateway-config.yaml
+        - name: apisix-config-volume
+          emptyDir: {}

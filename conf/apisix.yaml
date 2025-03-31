@@ -1,0 +1,20 @@
+routes:
+  - uri: /hello
+    upstream:
+      type: roundrobin
+      nodes:
+        "httpbin.org:80": 1
+      scheme: http
+      pass_host: node
+      timeout:
+        connect: 20
+        send: 20
+        read: 20
+    plugins:
+    #   response-rewrite:
+    #     body: "Hello, APISIX in standalone mode!"
+      proxy-rewrite:
+        regex_uri:
+        - "^/hello"
+        - "/get"
+#END

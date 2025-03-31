@@ -1,0 +1,1 @@
+## Repo to setup APISIX standalone gateway ( without ETCD )

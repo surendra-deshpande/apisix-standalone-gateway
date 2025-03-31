@@ -1,0 +1,88 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: apisix-standalone-gateway-config.yaml
+  namespace: {{ .Values.namespace }}
+data:
+  apisix-config.yaml: |
+    #apisix:
+    #  ssl:
+    #    ssl_trusted_certificate: /usr/local/apisix/conf/ca-certificates.crt
+      
+            
+      enable_ipv6: false
+      
+    nginx_config:                      # config for render the template to generate nginx.conf
+      http_configuration_snippet: |
+        proxy_buffer_size 128k;
+        proxy_buffers 32 128k;
+        proxy_busy_buffers_size 128k;
+      http_server_configuration_snippet: |
+        proxy_buffer_size 128k;
+        proxy_buffers 32 128k;
+        proxy_busy_buffers_size 128k;
+
+    deployment:
+      role: data_plane
+      role_data_plane:
+        config_provider: yaml
+
+    plugins:
+      - datadome-protect     
+      - real-ip                        # priority: 23000
+      - client-control                 # priority: 22000
+      - proxy-control                  # priority: 21990
+      - request-id                     # priority: 12015
+      - zipkin                         # priority: 12011
+      - ext-plugin-pre-req             # priority: 12000
+      - fault-injection                # priority: 11000
+      - mocking                        # priority: 10900
+      - serverless-pre-function        # priority: 10000
+      - cors                           # priority: 4000
+      - ip-restriction                 # priority: 3000
+      - ua-restriction                 # priority: 2999
+      - referer-restriction            # priority: 2990
+      - csrf                           # priority: 2980
+      - uri-blocker                    # priority: 2900
+      - request-validation             # priority: 2800
+      - chaitin-waf                    # priority: 2700
+      - openid-connect                 # priority: 2599
+      - cas-auth                       # priority: 2597
+      - authz-casbin                   # priority: 2560
+      - authz-casdoor                  # priority: 2559
+      - wolf-rbac                      # priority: 2555
+      - ldap-auth                      # priority: 2540
+      - hmac-auth                      # priority: 2530
+      - basic-auth                     # priority: 2520
+      - jwt-auth                       # priority: 2510
+      - key-auth                       # priority: 2500
+      - consumer-restriction           # priority: 2400
+      - forward-auth                   # priority: 2002
+      - opa                            # priority: 2001
+      - authz-keycloak                 # priority: 2000
+      - proxy-cache                    # priority: 1085
+      - body-transformer               # priority: 1080
+      - proxy-mirror                   # priority: 1010
+      - proxy-rewrite                  # priority: 1008
+      - workflow                       # priority: 1006
+      - api-breaker                    # priority: 1005
+      - limit-conn                     # priority: 1003
+      - limit-count                    # priority: 1002
+      - limit-req                      # priority: 1001
+      - gzip                           # priority: 995
+      - server-info                    # priority: 990
+      - traffic-split                  # priority: 966
+      - redirect                       # priority: 900
+      - response-rewrite               # priority: 899
+      - public-api                     # priority: 501
+      - prometheus                     # priority: 500
+      - sls-logger                     # priority: 406
+      - tcp-logger                     # priority: 405
+      - syslog                         # priority: 401
+      - udp-logger                     # priority: 400
+      - aws-lambda                     # priority: -1899
+      - openwhisk                      # priority: -1901
+      - openfunction                   # priority: -1902
+      - serverless-post-function       # priority: -2000
+      - ext-plugin-post-req            # priority: -3000
+      - ext-plugin-post-resp           # priority: -4000

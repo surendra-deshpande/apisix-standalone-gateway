@@ -1,0 +1,32 @@
+namespace: your-namespace
+deployment:
+  replicas: 1
+  ports:
+    http: 9085
+    https: 9443
+  image: apache/apisix:3.11.0-debian
+  initimage: busybox:1.35
+
+configmap:
+  fallbacksni: "example.com"
+
+service:
+  name: apisix-standalone-gateway
+  http:
+    port: 9080
+  https:
+    port: 9443
+  hostname: example.com
+ssls:
+    cert: |
+        -----BEGIN CERTIFICATE-----
+        "example.com-ssl-certificate"
+        -----END CERTIFICATE-----
+        
+    key: |
+        -----BEGIN PRIVATE KEY-----
+        "example.com-ssl-private-key"
+        -----END PRIVATE KEY-----
+
+snis:
+  - "example.com"
