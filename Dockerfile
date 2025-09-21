@@ -2,6 +2,7 @@ FROM apache/apisix:3.11.0-debian
 
 #adding custom plugins. Make sure to configure the same in the routes.
 COPY --chown=apisix ./plugins/datadome-protect.lua /usr/local/apisix/apisix/plugins/datadome-protect.lua
+COPY --chown=apisix ./plugins/jwt-header-plugin.lua /usr/local/apisix/apisix/plugins/jwt-header-plugin.lua
 
 #Update default config.
 #Note, different versions may have fewer plugins. Accordingly adjust the config file.
